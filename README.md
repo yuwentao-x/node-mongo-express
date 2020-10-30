@@ -350,14 +350,14 @@ router.post('/upload',(req,res,next)=>{
             // 读取流
             var read = fs.createReadStream(file.path);
             // 写入流
-            var write = fs.createWriteStream(path.join(__dirname,"..",'public/imgs',file.originalFilename))
+            var write = fs.createWriteStream(path.join(__dirname,"..",'public/images/',file.originalFilename))
             // 管道流,图片流入指定目录
             read.pipe(write);
             write.on('close',function(){
                 console.log('图片上传完成')
                 res.send({
                     err:0,
-                    msg:'/imgs/'+file.originalFilename
+                    msg:'/images/'+file.originalFilename
                 })
             })
         }
@@ -536,12 +536,12 @@ router.get('/write',(req,res,next)=>{
   
 
   <div class="detail">
-    <div class="title"><%=doc.title%></div>
+    <div class="title"><%-doc.title%></div>
     <div class='desc'>
       <span>作者：<%=doc.username%></span>
       <span>发布时间：<%=doc.createTimeZH%></span>
     </div>
-    <div class="content"><%=doc.content%></div>
+    <div class="content"><%-doc.content%></div>
   </div>
 
 </body>
