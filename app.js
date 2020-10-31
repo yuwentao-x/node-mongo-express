@@ -15,7 +15,7 @@ var db = require('./db/connect');
 var favicon = require('serve-favicon');
 
 var app = express();
-//faviconpei配置
+//favicon配置
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 // 配置ejs模板引擎

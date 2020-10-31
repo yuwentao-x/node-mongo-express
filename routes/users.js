@@ -14,30 +14,36 @@ let userModel = require('../db/userModel')
 router.post('/regist', (req, res, next) => {
   // 接收post数据
   let { username, password, password2 } = req.body; // 结构赋值
-  password = bcrypt.hashSync(password, 10);
-  // 数据校验工作,在这里完成
-  // 查询是否存在这个用户
-  userModel.find({ username }).then(docs => {
-    if (docs.length > 0) {
-      // res.send('用户已存在')
-      res.redirect('/regist')
-    } else {
-      // 用户不存在,开始注册
-      let createTime = Date.now();
-      // 插入数据
-      userModel.insertMany({
-        username,
-        password,
-        createTime
-      }).then(docs => {
-        // res.send('注册成功')
-        res.redirect('/login')
-      }).catch(err => {
-        // res.send('注册失败')
-        res.redirect('./regist')
-      })
-    }
-  })
+  if (password == password2) {
+    // 密码不直接存入数据,先加密,再存入数据库
+    password = bcrypt.hashSync(password, 10)
+    // 数据校验工作,在这里完成
+    // 查询是否存在这个用户
+    userModel.find({ username }).then(docs => {
+      if (docs.length) {
+        res.send('用户已存在')
+      } else {
+        // 用户不存在,开始注册
+        let createTime = Date.now();
+        // 插入数据
+        userModel.insertMany({
+          username,
+          password,
+          createTime
+        }).then(docs => {
+          // res.send('注册成功')
+          res.redirect('/login')
+        }).catch(err => {
+          // res.send('注册失败')
+          res.redirect('/regist')
+        })
+
+      }
+    })
+  } else {
+    // res.send('密码不匹配')
+    res.redirect('/regist')
+  }
 });
 
 /* 

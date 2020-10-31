@@ -177,7 +177,7 @@ let userModel = require('../db/userModel');
 */
 router.post('/regist',(req,res,next)=>{
     // 接收post数据
-    let {username,password,password2}=>req.body; // 结构赋值
+    let {username,password,password2}=req.body; // 结构赋值
     // 数据校验工作,在这里完成
     // 查询是否存在这个用户
     userModel.find({username}).then(docs=>{
@@ -276,7 +276,7 @@ let articleModel =require('../db/articleModel');
     + 返回值:重定向,有id是修改业务,无id是新增业务,成功重定向/,失败重定向/write
 */
 router.post('post',(req,res,next)=>{
-    // 就收post数据
+    // 接收post数据
     let {title,content,username,id}=req.body;
     // 当前时间
     let createTime = Date.now()
@@ -342,7 +342,7 @@ router.get('/delete',(req,res,next)=>{
 router.post('/upload',(req,res,next)=>{
     // 每次访问该接口,都新建一个form对象来解析文件数据
     var form = new multiparty.Form();
-    form.parse(req,field,files)=>{
+    form.parse(req,(err,field,files)=>{
         if(err){
             console.log('文件上传失败')
         }else{
@@ -361,7 +361,7 @@ router.post('/upload',(req,res,next)=>{
                 })
             })
         }
-    }
+    })
 })
 module.exports = router;
 
@@ -381,7 +381,7 @@ module.exports = router;
 
 ## 11 模板子路由-首页路由(/)
 ```js
-const articleModel = require('db/articleModel');
+const articleModel = require('../db/articleModel');
 const moment = require('moment');// 时间格式化
 // 首页路由
 router.get('/',(req,res,next)=>{
@@ -654,4 +654,42 @@ router.post('/login',(req,res,next)=>{
         res.redirect('/login')
     })
 })
+```
+### 19.4注册密码验证
+    + 验证两次密码输入是否相同
+```js
+router.post('/regist', (req, res, next) => {
+  // 接收post数据
+  let { username, password, password2 } = req.body; // 结构赋值
+  if (password == password2) {
+    // 密码不直接存入数据,先加密,再存入数据库
+    password = bcrypt.hashSync(password, 10)
+    // 数据校验工作,在这里完成
+    // 查询是否存在这个用户
+    userModel.find({ username }).then(docs => {
+      if (docs.length) {
+        res.send('用户已存在')
+      } else {
+        // 用户不存在,开始注册
+        let createTime = Date.now();
+        // 插入数据
+        userModel.insertMany({
+          username,
+          password,
+          createTime
+        }).then(docs => {
+          // res.send('注册成功')
+          res.redirect('/login')
+        }).catch(err => {
+          // res.send('注册失败')
+          res.redirect('/regist')
+        })
+
+      }
+    })
+  } else {
+    // res.send('密码不匹配')
+    res.redirect('/regist')
+  }
+});
 ```
